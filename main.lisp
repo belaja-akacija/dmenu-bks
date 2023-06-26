@@ -1,7 +1,7 @@
 ;;;; open a pdf in zathura in my bookmarks folder from dmenu
 
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
-(defparameter *images* '("*.png" "*.jpg" "*.jpeg"))
+(defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
 
 (defun show-dir (path)
   "Shows the current directory in dmenu"
@@ -23,7 +23,8 @@
   (let ((curr-path (directory-namestring path)))
     (cond
      ((find path *documents* :test #'pathname-match-p)
-      (launch-zathura path))
+      (launch-zathura path)
+      (follow-path (show-dir curr-path)))
      ((find path *images* :test #'pathname-match-p)
       (launch-sxiv path)
       (follow-path (show-dir curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
