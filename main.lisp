@@ -1,5 +1,7 @@
 ;;;; open a pdf in zathura in my bookmarks folder from dmenu
 
+;;; TODO be able to type ".." in dmenu and go back a directory
+
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
 
