@@ -29,7 +29,10 @@
   "Follows directories and sends paths to (send-file)"
   (let ((parent (cl-fad:pathname-directory-pathname cwd)))
   (cond ((or (string-equal path "..") (string-equal path "...") (string-equal path "../")) ; just in case a file name weirdly has multiple dots in it
-         (follow-path (show-dir parent) (cl-fad:pathname-parent-directory parent)))
+         (follow-path (show-dir (if (null path) ; for some reason, from main, "path" is null at first, so this is necessary
+                                    (merge-pathnames parent (pathname ".."))
+                                    parent))
+                      (cl-fad:pathname-parent-directory parent)))
         ((null (cl-fad:directory-pathname-p path))
          (send-file path))
         ((cl-fad:directory-pathname-p path)
