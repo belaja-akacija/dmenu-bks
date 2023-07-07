@@ -4,6 +4,11 @@
 
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
+(defparameter *books-directory* #P "~/Documents/Books/" )
+(defparameter *pictures-directory* #P "~/Pictures/" )
+
+(defun check-path (path)
+  (directory path))
 
 (defun show-dir (path)
   "Shows the current directory in dmenu"
@@ -12,13 +17,18 @@
         (path-list (format nil "~{~A~%~}" path-list-raw))
         (tmp #P "/tmp/bks.tmp"))
     (overwrite-file! tmp path-list)
-    (launch-dmenu path-length tmp "Choose file: ")))
+    (if (check-path path)
+        (launch-dmenu path-length tmp "Choose file: ")
+        (launch-dmenu path-length tmp "Directory not found."))))
 
-(defun follow-path (path)
+(defun follow-path (path cwd)
   "Follows directories and sends paths to (send-file)"
-  (if  (null (cl-fad:directory-pathname-p path))
-      (send-file path)
-      (follow-path (show-dir path))))
+  (cond ((string-equal path "..")
+         (follow-path (show-dir (cl-fad:pathname-parent-directory cwd)) (cl-fad:pathname-parent-directory cwd)))
+        ((null (cl-fad:directory-pathname-p path))
+         (send-file path))
+        ((cl-fad:directory-pathname-p path)
+         (follow-path (show-dir path) (cl-fad:pathname-parent-directory path)))))
 
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
@@ -26,15 +36,15 @@
     (cond
      ((find path *documents* :test #'pathname-match-p)
       (launch-zathura path)
-      (follow-path (show-dir curr-path)))
+      (follow-path (show-dir curr-path) (cl-fad:pathname-directory-pathname curr-path)))
      ((find path *images* :test #'pathname-match-p)
       (launch-sxiv path)
-      (follow-path (show-dir curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
+      (follow-path (show-dir curr-path) (cl-fad:pathname-directory-pathname curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
      (t (format t "suitable program not found.")))))
 
 (defun main ()
   (cond
     ((not (null (find (nth 1 sb-ext:*posix-argv*) '("nil" "b" "bks") :test #'string-equal )))
-     (follow-path (show-dir #P "~/Documents/Books/")))
+     (follow-path (show-dir *books-directory*) *books-directory*))
      ((not (null (find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)))
-      (follow-path (show-dir #P "~/Pictures/")))))
+      (follow-path (show-dir *pictures-directory*) *pictures-directory*))))
