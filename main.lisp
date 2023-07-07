@@ -3,6 +3,7 @@
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
 (defparameter *audio* '("*.wav" "*.WAV" "*.MP3" "*.mp3" "*.ogg" "*.OGG"))
+(defparameter *text* '("*.txt" "*.TXT" "*.md" "*.MD"))
 (defparameter *books-directory* #P "~/Documents/Books/" )
 (defparameter *pictures-directory* #P "~/Pictures/" )
 (defparameter *music-directory* #P "/media/backup-drive/AUDIO/" )
@@ -49,15 +50,17 @@
            (launch-player *terminal* *player* path)
            (launch-player *terminal* "ffplay" path))
        (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+((find path *text* :test #'pathname-match-p)
+       (launch-text *terminal* path *editor*)
+       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
       (t (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
                          path
                          (if (not (string-equal "n"
                                                 (string (char (string-downcase
                                                                 (if (string-equal "" (launch-dmenu-prompt "With terminal?(Y/n)")) "y")) 0)))) ; this is cancer but it works
                              *terminal*
-                             nil))))))
-;(t (format t "suitable program not found. Trying in vim...")
-;(launch-text *terminal* path *editor*)))))
+                             nil))
+         (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))))))
 
 (defun main ()
   (cond
