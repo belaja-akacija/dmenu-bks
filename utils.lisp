@@ -19,6 +19,11 @@
 (defun launch-nvlc (terminal path)
   (uiop:run-program `(,terminal "-e" "nvlc" ,path)))
 
+(defun launch-generic (program path &optional terminal)
+  (if (null terminal)
+      (uiop:run-program `(,program ,path))
+        (uiop:run-program `(,terminal "-e" ,program ,path))))
+
 (defun launch-text (terminal path &optional editor)
   (let ((editor-list '("vim" "nvim"))
         (tmp #P "/tmp/editors-bks"))
@@ -35,7 +40,7 @@
           ((null editor)
            (uiop:run-program `(,terminal "-e"
                                          ,(launch-dmenu-prompt (format nil "(~A) Which editor do you want to use?"
-                                                                      (pathname-name path)))
+                                                                       (pathname-name path)))
                                          ,path)
                              :ignore-error-status t))
           (t

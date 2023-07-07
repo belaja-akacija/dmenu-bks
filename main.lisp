@@ -38,25 +38,32 @@
   "Send the directory path to the program that opens that type of file"
   (let ((curr-path (directory-namestring path)))
     (cond
-     ((find path *documents* :test #'pathname-match-p)
-      (launch-zathura path)
-      (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
-     ((find path *images* :test #'pathname-match-p)
-      (launch-sxiv path)
-      (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
-     ((find path *audio* :test #'pathname-match-p)
-      (if (fad:file-exists-p (merge-pathnames #P "/usr/bin/" (pathname *player*)))
-          (launch-player *terminal* *player* path)
-          (launch-player *terminal* "ffplay" path))
-      (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
-     (t (format t "suitable program not found. Trying in vim...")
-        (launch-text *terminal* path *editor*)))))
+      ((find path *documents* :test #'pathname-match-p)
+       (launch-zathura path)
+       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+      ((find path *images* :test #'pathname-match-p)
+       (launch-sxiv path)
+       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
+      ((find path *audio* :test #'pathname-match-p)
+       (if (fad:file-exists-p (merge-pathnames #P "/usr/bin/" (pathname *player*)))
+           (launch-player *terminal* *player* path)
+           (launch-player *terminal* "ffplay" path))
+       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+      (t (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
+                         path
+                         (if (not (string-equal "n"
+                                                (string (char (string-downcase
+                                                                (if (string-equal "" (launch-dmenu-prompt "With terminal?(Y/n)")) "y")) 0)))) ; this is cancer but it works
+                             *terminal*
+                             nil))))))
+;(t (format t "suitable program not found. Trying in vim...")
+;(launch-text *terminal* path *editor*)))))
 
 (defun main ()
   (cond
     ((find (nth 1 sb-ext:*posix-argv*) '("nil" "b" "bks") :test #'string-equal )
      (follow-path (show-dir *books-directory*) *books-directory*))
-     ((find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)
-      (follow-path (show-dir *pictures-directory*) *pictures-directory*))
-     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
-      (follow-path (show-dir *music-directory*) *music-directory*))))
+    ((find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)
+     (follow-path (show-dir *pictures-directory*) *pictures-directory*))
+    ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
+     (follow-path (show-dir *music-directory*) *music-directory*))))
