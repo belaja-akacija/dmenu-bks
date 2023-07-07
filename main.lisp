@@ -25,16 +25,13 @@
 
 (defun follow-path (path cwd)
   "Follows directories and sends paths to (send-file)"
-  (let ((parent (fad:pathname-directory-pathname cwd)))
+  (let ((parent (fad:pathname-parent-directory cwd)))
   (cond ((or (string-equal path "..") (string-equal path "...") (string-equal path "../")) ; just in case a file name weirdly has multiple dots in it
-         (follow-path (show-dir (if (null path) ; for some reason, from main, "path" is null at first, so this is necessary
-                                    (merge-pathnames parent (pathname ".."))
-                                    parent))
-                      (fad:pathname-parent-directory parent)))
+         (follow-path (show-dir parent) parent))
         ((null (fad:directory-pathname-p path))
          (send-file path))
         ((fad:directory-pathname-p path)
-         (follow-path (show-dir path) (fad:pathname-parent-directory path))))))
+         (follow-path (show-dir path) path)))))
 
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
