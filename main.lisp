@@ -4,8 +4,11 @@
 
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
+(defparameter *audio* '("*.wav" "*.mp3" "*.ogg"))
 (defparameter *books-directory* #P "~/Documents/Books/" )
 (defparameter *pictures-directory* #P "~/Pictures/" )
+(defparameter *terminal* "st")
+(defparameter *player* "nvlc")
 
 (defun check-path (path)
   (directory path))
@@ -40,6 +43,11 @@
      ((find path *images* :test #'pathname-match-p)
       (launch-sxiv path)
       (follow-path (show-dir curr-path) (cl-fad:pathname-directory-pathname curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
+     ((find path *audio* :test #'pathname-match-p)
+      (if (cl-fad:file-exists-p (merge-pathnames #P "/usr/bin/" (pathname *player*)))
+          (launch-player *terminal* *player* path)
+          (launch-player *terminal* "ffplay" path))
+      (follow-path (show-dir curr-path) (cl-fad:pathname-directory-pathname curr-path)))
      (t (format t "suitable program not found.")))))
 
 (defun main ()

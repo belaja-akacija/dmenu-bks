@@ -10,8 +10,11 @@
 (defun launch-sxiv (path)
   (uiop:run-program `("sxiv" "-a" ,path)))
 
-(defun launch-nvlc (path)
-  (uiop:run-program `("nvlc" ,path)))
+(defun launch-player (terminal player path)
+  (uiop:run-program `(,terminal "-e" ,player ,path)))
+
+(defun launch-nvlc (terminal path)
+  (uiop:run-program `(,terminal "-e" "nvlc" ,path)))
 
 (defun overwrite-file! (file removed-lines &key (type :human))
   (with-open-file (in file
