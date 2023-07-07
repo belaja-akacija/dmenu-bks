@@ -8,6 +8,7 @@
 (defparameter *music-directory* #P "/media/backup-drive/AUDIO/" )
 (defparameter *terminal* "st")
 (defparameter *player* "nvlc")
+(defparameter *editor* "nvim")
 
 (defun check-path (path)
   (directory path))
@@ -48,7 +49,8 @@
           (launch-player *terminal* *player* path)
           (launch-player *terminal* "ffplay" path))
       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
-     (t (format t "suitable program not found.")))))
+     (t (format t "suitable program not found. Trying in vim...")
+        (launch-text *terminal* path *editor*)))))
 
 (defun main ()
   (cond

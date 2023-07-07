@@ -4,6 +4,9 @@
                      :output :string
                      :ignore-error-status nil)))
 
+(defun launch-dmenu-prompt (prompt)
+  (string-trim '(#\NewLine) (uiop:run-program `("dmenu" "-l" "6" "-p" ,prompt) :output :string)))
+
 (defun launch-zathura (path)
   (uiop:run-program `("zathura" ,path)))
 
@@ -16,14 +19,36 @@
 (defun launch-nvlc (terminal path)
   (uiop:run-program `(,terminal "-e" "nvlc" ,path)))
 
+(defun launch-text (terminal path &optional editor)
+  (let ((editor-list '("vim" "nvim"))
+        (tmp #P "/tmp/editors-bks"))
+    (overwrite-file! tmp (format nil "~{~A~%~}" editor-list :type :human))
+    (if (string-equal editor "") ; make sure editor is nil, if editor was passed to the function
+        (setf editor nil))
+    (cond ((and
+             (fad:file-exists-p #P "/usr/bin/vim")
+             (fad:file-exists-p #P "/usr/bin/nvim")
+             (null editor))
+           (uiop:run-program `(,terminal "-e"
+                                         ,(launch-dmenu "2" tmp (format nil "(~A) Launch in: " (pathname-name path)))
+                                         ,path)))
+          ((null editor)
+           (uiop:run-program `(,terminal "-e"
+                                         ,(launch-dmenu-prompt (format nil "(~A) Which editor do you want to use?"
+                                                                      (pathname-name path)))
+                                         ,path)
+                             :ignore-error-status t))
+          (t
+           (uiop:run-program `(,terminal "-e" ,editor ,path))))))
+
 (defun overwrite-file! (file removed-lines &key (type :human))
   (with-open-file (in file
                       :direction :output
-                      :if-exists :supersede
-                      :if-does-not-exist :create) ; overwrite file
+                      :if-exists :supersede ; overwrite file
+                      :if-does-not-exist :create)
     (if (equal type :data)
-    (format in "~s" removed-lines)
-    (format in "~A" removed-lines))))
+        (format in "~s" removed-lines)
+        (format in "~A" removed-lines))))
 
 (defun show-dialog (dialog &key (justify "left"))
   (let* ((justification (format nil "--justify=~A" justify))
@@ -37,7 +62,7 @@
                       :output :string)))
 
 (defun get-directory-files (lst)
-         (mapcar #'pathname-name lst))
+  (mapcar #'pathname-name lst))
 
 (defun index-of (lst ele i)
   (cond ((null lst) nil)
@@ -46,7 +71,7 @@
 
 (defun get-file-lines (file)
   (let ((lngth 0)) (with-open-file (stream file)
-     (loop for line = (read-line stream nil)
-           while line
-           do (setf lngth (1+ lngth))))
+                     (loop for line = (read-line stream nil)
+                           while line
+                           do (setf lngth (1+ lngth))))
     (format nil "~s" lngth)))
