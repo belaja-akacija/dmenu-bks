@@ -22,17 +22,18 @@
         (tmp #P "/tmp/bks.tmp"))
     (overwrite-file! tmp path-list)
     (if (check-path path)
-        (launch-dmenu "6" tmp "Choose file: ") ; show only 6 files at a time
+        (launch-dmenu "8" tmp (format nil "(~A) Choose file: " path-length)) ; show only 8 files at a time
         (launch-dmenu path-length tmp "Directory not found."))))
 
 (defun follow-path (path cwd)
   "Follows directories and sends paths to (send-file)"
+  (let ((parent (cl-fad:pathname-directory-pathname cwd)))
   (cond ((or (string-equal path "..") (string-equal path "...") (string-equal path "../")) ; just in case a file name weirdly has multiple dots in it
-         (follow-path (show-dir (cl-fad:pathname-parent-directory cwd)) (cl-fad:pathname-parent-directory cwd)))
+         (follow-path (show-dir parent) (cl-fad:pathname-parent-directory parent)))
         ((null (cl-fad:directory-pathname-p path))
          (send-file path))
         ((cl-fad:directory-pathname-p path)
-         (follow-path (show-dir path) (cl-fad:pathname-parent-directory path)))))
+         (follow-path (show-dir path) (cl-fad:pathname-parent-directory path))))))
 
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
