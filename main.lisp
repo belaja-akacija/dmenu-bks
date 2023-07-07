@@ -4,9 +4,10 @@
 
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
-(defparameter *audio* '("*.wav" "*.mp3" "*.ogg"))
+(defparameter *audio* '("*.wav" "*.WAV" "*.MP3" "*.mp3" "*.ogg" "*.OGG"))
 (defparameter *books-directory* #P "~/Documents/Books/" )
 (defparameter *pictures-directory* #P "~/Pictures/" )
+(defparameter *music-directory* #P "/media/backup-drive/AUDIO/" )
 (defparameter *terminal* "st")
 (defparameter *player* "nvlc")
 
@@ -21,12 +22,12 @@
         (tmp #P "/tmp/bks.tmp"))
     (overwrite-file! tmp path-list)
     (if (check-path path)
-        (launch-dmenu path-length tmp "Choose file: ")
+        (launch-dmenu "6" tmp "Choose file: ") ; show only 6 files at a time
         (launch-dmenu path-length tmp "Directory not found."))))
 
 (defun follow-path (path cwd)
   "Follows directories and sends paths to (send-file)"
-  (cond ((string-equal path "..")
+  (cond ((or (string-equal path "..") (string-equal path "...") (string-equal path "../")) ; just in case a file name weirdly has multiple dots in it
          (follow-path (show-dir (cl-fad:pathname-parent-directory cwd)) (cl-fad:pathname-parent-directory cwd)))
         ((null (cl-fad:directory-pathname-p path))
          (send-file path))
@@ -52,7 +53,9 @@
 
 (defun main ()
   (cond
-    ((not (null (find (nth 1 sb-ext:*posix-argv*) '("nil" "b" "bks") :test #'string-equal )))
+    ((find (nth 1 sb-ext:*posix-argv*) '("nil" "b" "bks") :test #'string-equal )
      (follow-path (show-dir *books-directory*) *books-directory*))
-     ((not (null (find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)))
-      (follow-path (show-dir *pictures-directory*) *pictures-directory*))))
+     ((find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)
+      (follow-path (show-dir *pictures-directory*) *pictures-directory*))
+     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
+      (follow-path (show-dir *music-directory*) *music-directory*))))
