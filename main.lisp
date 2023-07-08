@@ -1,4 +1,4 @@
-;;;; open a pdf in zathura in my bookmarks folder from dmenu
+;;;; open a pdf in zathura in my bookmarks folder from dmenu (and more!)
 
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
@@ -35,6 +35,7 @@
         ((fad:directory-pathname-p path)
          (follow-path (show-dir path) path)))))
 
+;;; TODO cleanup this function. Possibly extract out that really nested thing (pls)
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
   (let ((curr-path (directory-namestring path)))
@@ -50,14 +51,15 @@
            (launch-player *terminal* *player* path)
            (launch-player *terminal* "ffplay" path))
        (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
-((find path *text* :test #'pathname-match-p)
+      ((find path *text* :test #'pathname-match-p)
        (launch-text *terminal* path *editor*)
        (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
       (t (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
                          path
-                         (if (not (string-equal "n"
-                                                (string (char (string-downcase
-                                                                (if (string-equal "" (launch-dmenu-prompt "With terminal?(Y/n)")) "y")) 0)))) ; this is cancer but it works
+                         (if (not (string=
+                                    "n"
+                                    (string-downcase
+                                      (launch-dmenu-prompt "With terminal?(Y/n)"))))
                              *terminal*
                              nil))
          (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))))))
