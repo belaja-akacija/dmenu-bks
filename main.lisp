@@ -7,6 +7,7 @@
 (defparameter *books-directory* #P "~/Documents/Books/" )
 (defparameter *pictures-directory* #P "~/Pictures/" )
 (defparameter *music-directory* #P "/media/backup-drive/AUDIO/" )
+(defparameter *homework-directory* #P "~/Documents/Personal/CS-degree/homework/" )
 (defparameter *terminal* "st")
 (defparameter *player* "nvlc")
 (defparameter *editor* "nvim")
@@ -60,8 +61,8 @@
                                     "n"
                                     (string-downcase
                                       (launch-dmenu-prompt "With terminal?(Y/n)"))))
-                             *terminal*
-                             nil))
+                             *terminal* ; if not "n", then send it with the terminal variable in the param list
+                             nil)) ; still a bit of an abomination, but not as bad now
          (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))))))
 
 (defun main ()
@@ -71,4 +72,6 @@
     ((find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)
      (follow-path (show-dir *pictures-directory*) *pictures-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
-     (follow-path (show-dir *music-directory*) *music-directory*))))
+     (follow-path (show-dir *music-directory*) *music-directory*))
+    ((find (nth 1 sb-ext:*posix-argv*) '("h" "hw") :test #'string-equal)
+     (follow-path (show-dir *homework-directory*) *homework-directory*))))
