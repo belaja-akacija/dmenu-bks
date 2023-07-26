@@ -14,7 +14,9 @@
   (uiop:run-program `("sxiv" "-a" ,path)))
 
 (defun launch-player (terminal player path)
-  (uiop:run-program `(,terminal "-e" ,player ,path)))
+  (if (null player)
+      (launch-dmenu-prompt "Player Not Found")
+      (uiop:run-program `(,terminal "-e" ,player ,path))))
 
 (defun launch-nvlc (terminal path)
   (uiop:run-program `(,terminal "-e" "nvlc" ,path)))
