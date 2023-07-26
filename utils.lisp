@@ -19,6 +19,8 @@
 (defun launch-nvlc (terminal path)
   (uiop:run-program `(,terminal "-e" "nvlc" ,path)))
 
+;; TODO: refactor this and actually use it for all cases
+;; (!!!)
 (defun launch-generic (program path &optional terminal)
   (if (null terminal)
       (uiop:run-program `(,program ,path))

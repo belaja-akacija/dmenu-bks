@@ -9,9 +9,8 @@
 (defparameter *music-directory* '(#P "/media/backup-drive/AUDIO/" #P "~/Documents/Music/"))
 (defparameter *homework-directory* '(#P "~/Documents/Personal/CS-degree/homework/") )
 (defparameter *terminal* "st")
-(defparameter *player* "nvlc")
+(defparameter *player* '("nvlc" "ffplay"))
 (defparameter *editor* "nvim")
-
 
 ;; ListOfPaths -> Path
 (defun available-path (lop)
@@ -21,6 +20,15 @@
         ((if (directory (car lop))
              (car lop)
              (available-path (cdr lop))))))
+
+;; ListOfApps -> String
+(defun available-program (loa)
+  "produce the first available program string to give to the terminal, given a list of programs."
+    (cond ((null (car loa))
+          '())
+         ((if (fad:file-exists-p (merge-pathnames #P "/usr/bin/" (pathname (car loa))))
+              (car loa)
+              (available-program (cdr loa))))))
 
 (defun check-path (path)
   (directory path))
@@ -46,6 +54,11 @@
           ((fad:directory-pathname-p path)
            (follow-path (show-dir path) path)))))
 
+;; Path -> Void
+(defun go-back-dir (path)
+  "Go back to the given directory after closing an application, then open it in dmenu"
+  (follow-path (show-dir path) (fad:pathname-directory-pathname path)))
+
 ;;; TODO cleanup this function. Possibly extract out that really nested thing (pls)
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
@@ -53,18 +66,16 @@
     (cond
       ((find path *documents* :test #'pathname-match-p)
        (launch-zathura path)
-       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+       (go-back-dir curr-path))
       ((find path *images* :test #'pathname-match-p)
        (launch-sxiv path)
-       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))) ; go back to the current directory you were just in, in dmenu, after closing sxiv
+       (go-back-dir curr-path)) ; go back to the current directory you were just in, in dmenu, after closing sxiv
       ((find path *audio* :test #'pathname-match-p)
-       (if (fad:file-exists-p (merge-pathnames #P "/usr/bin/" (pathname *player*)))
-           (launch-player *terminal* *player* path)
-           (launch-player *terminal* "ffplay" path))
-       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+       (launch-player *terminal* (available-program *player*) path)
+       (go-back-dir curr-path))
       ((find path *text* :test #'pathname-match-p)
        (launch-text *terminal* path *editor*)
-       (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path)))
+       (go-back-dir curr-path))
       (t (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
                          path
                          (if (not (string=
@@ -73,7 +84,7 @@
                                       (launch-dmenu-prompt "With terminal?(Y/n)"))))
                              *terminal* ; if not "n", then send it with the terminal variable in the param list
                              nil)) ; still a bit of an abomination, but not as bad now
-         (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))))))
+         (go-back-dir curr-path)))))
 
 ;; ListOfPaths -> Void
 ;; driver function that abstracts out the needed nesting for the functions to do their thing
@@ -82,7 +93,6 @@
 "Follow the first available path and show the directory in dmenu"
   (let ((path (available-path lop)))
     (follow-path (show-dir path) path)))
-
 
 (defun main ()
   (cond
