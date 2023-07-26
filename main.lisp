@@ -125,6 +125,4 @@
     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
      (bks-driver *music-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("v" "vid") :test #'string-equal)
-     (bks-driver *video-directory*))
-    ((find (nth 1 sb-ext:*posix-argv*) '("h" "hw") :test #'string-equal)
-     (bks-driver *homework-directory*))))
+     (bks-driver *video-directory*))))
