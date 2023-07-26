@@ -12,15 +12,10 @@
 (defparameter *player* "nvlc")
 (defparameter *editor* "nvim")
 
-;; take a list of paths, test for the first available directory, and output that path.
 
 ;; ListOfPaths -> Path
-;; produce the first available path, given a list of paths
-
-;(defun available-path (lop)
-  ;#P "test") ;stub
-
 (defun available-path (lop)
+"produce the first available path, given a list of paths"
   (cond ((null (car lop))
          #P "nil/")
         ((if (directory (car lop))
@@ -80,14 +75,22 @@
                              nil)) ; still a bit of an abomination, but not as bad now
          (follow-path (show-dir curr-path) (fad:pathname-directory-pathname curr-path))))))
 
+;; ListOfPaths -> Void
+;; driver function that abstracts out the needed nesting for the functions to do their thing
+
+(defun bks-driver (lop)
+"Follow the first available path and show the directory in dmenu"
+  (let ((path (available-path lop)))
+    (follow-path (show-dir path) path)))
+
 
 (defun main ()
   (cond
     ((find (nth 1 sb-ext:*posix-argv*) '("nil" "b" "bks") :test #'string-equal )
-     (follow-path (show-dir (available-path *books-directory*)) (available-path *books-directory*)))
+     (bks-driver *books-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("i" "img") :test #'string-equal)
-     (follow-path (show-dir (available-path *pictures-directory*)) (available-path *pictures-directory*)))
+     (bks-driver *pictures-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
-     (follow-path (show-dir (available-path *music-directory*)) (available-path *music-directory*)))
+     (bks-driver *music-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("h" "hw") :test #'string-equal)
-     (follow-path (show-dir (available-path *homework-directory*)) (available-path *homework-directory*)))))
+     (bks-driver *homework-directory*))))
