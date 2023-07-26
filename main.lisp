@@ -4,10 +4,12 @@
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
 (defparameter *audio* '("*.wav" "*.WAV" "*.MP3" "*.mp3" "*.ogg" "*.OGG"))
 (defparameter *text* '("*.txt" "*.TXT" "*.md" "*.MD"))
-(defparameter *books-directory* '(#P "~/Documents/Books/") )
-(defparameter *pictures-directory* '(#P "~/Pictures/") )
-(defparameter *music-directory* '(#P "/media/backup-drive/AUDIO/" #P "~/Documents/Music/"))
-(defparameter *homework-directory* '(#P "~/Documents/Personal/CS-degree/homework/") )
+;;; you may add alternate paths, in case one path ceases to exist.
+;;; Useful if you have external SSDs and constantly mount and unmount them
+;;; e.g. (defparameter *music-directory* '(#P "/media/some/ssd/path/Music/" #P "~/Documents/Music/"))
+(defparameter *books-directory* '(#P "~/Documents/Books/"))
+(defparameter *pictures-directory* '(#P "~/Pictures/"))
+(defparameter *music-directory* '(#P "~/Documents/Music/"))
 (defparameter *terminal* "st")
 (defparameter *player* '("nvlc" "ffplay"))
 (defparameter *editor* "nvim")
