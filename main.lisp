@@ -67,30 +67,34 @@
   "Send the directory path to the program that opens that type of file"
   (let ((curr-path (directory-namestring path)))
     (flet ((go-back-dir (path)
-  "Go back to the given directory after closing an application, then open it in dmenu"
-  (follow-path (show-dir path) (fad:pathname-directory-pathname path))))
+             "Go back to the given directory after closing an application, then open it in dmenu"
+             (follow-path (show-dir path) (fad:pathname-directory-pathname path)))
+           ;; TODO: should this be extracted from the function itself, or stay private?
+           (launch-generic-program ()
+             "Launch a program with a prompt in dmenu"
+             (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
+                             path
+                             (if (not (string=
+                                        "n"
+                                        (string-downcase
+                                          (launch-dmenu-prompt "With terminal?(Y/n)"))))
+                                 *terminal* ; if not "n", then send it with the terminal variable in the param list
+                                 nil)))) ; still a bit of an abomination, but not as bad now
       (cond
-       ((find path *documents* :test #'pathname-match-p)
-        (launch-zathura path)
-        (go-back-dir curr-path))
-       ((find path *images* :test #'pathname-match-p)
-        (launch-sxiv path)
-        (go-back-dir curr-path)) ; go back to the current directory you were just in, in dmenu, after closing sxiv
-       ((find path *audio* :test #'pathname-match-p)
-        (launch-player *terminal* (available-program *player*) path)
-        (go-back-dir curr-path))
-       ((find path *text* :test #'pathname-match-p)
-        (launch-text *terminal* path *editor*)
-        (go-back-dir curr-path))
-       (t (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
-                          path
-                          (if (not (string=
-                                     "n"
-                                     (string-downcase
-                                       (launch-dmenu-prompt "With terminal?(Y/n)"))))
-                              *terminal* ; if not "n", then send it with the terminal variable in the param list
-                              nil)) ; still a bit of an abomination, but not as bad now
-          (go-back-dir curr-path))))))
+        ((find path *documents* :test #'pathname-match-p)
+         (launch-zathura path)
+         (go-back-dir curr-path))
+        ((find path *images* :test #'pathname-match-p)
+         (launch-sxiv path)
+         (go-back-dir curr-path)) ; go back to the current directory you were just in, in dmenu, after closing sxiv
+        ((find path *audio* :test #'pathname-match-p)
+         (launch-player *terminal* (available-program *player*) path)
+         (go-back-dir curr-path))
+        ((find path *text* :test #'pathname-match-p)
+         (launch-text *terminal* path *editor*)
+         (go-back-dir curr-path))
+        (t (launch-generic-program)
+           (go-back-dir curr-path))))))
 
 ;; ListOfPaths -> Void
 ;; driver function that abstracts out the needed nesting for the functions to do their thing
