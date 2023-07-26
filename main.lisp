@@ -18,7 +18,7 @@
 (defun available-path (lop)
 "produce the first available path, given a list of paths"
   (cond ((null (car lop))
-         #P "nil/")
+         #P "")
         ((if (directory (car lop))
              (car lop)
              (available-path (cdr lop))))))
@@ -98,7 +98,9 @@
 (defun bks-driver (lop)
 "Follow the first available path and show the directory in dmenu"
   (let ((path (available-path lop)))
-    (follow-path (show-dir path) path)))
+    (if (equal path #P "")
+        (launch-dmenu-prompt (format nil "Unavailable path: ~A" path))
+        (follow-path (show-dir path) path))))
 
 (defun main ()
   (cond
