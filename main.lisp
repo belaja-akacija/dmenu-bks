@@ -1,17 +1,24 @@
 ;;;; open a pdf in zathura in my bookmarks folder from dmenu (and more!)
 
+;;; TODO: add feature to be able to choose which alternate directory to go to.
+;;; But the default should always be the first one in the list, or the first
+;;; one that is available.
+
 (defparameter *documents* '("*.PDF" "*.pdf" "*.djvu"))
 (defparameter *images* '("*.PNG" "*.png" "*.jpg" "*.jpeg"))
 (defparameter *audio* '("*.wav" "*.WAV" "*.MP3" "*.mp3" "*.ogg" "*.OGG"))
+(defparameter *video* '("*.mp4" "*.MP4" "*.webm" "*.rm"))
 (defparameter *text* '("*.txt" "*.TXT" "*.md" "*.MD"))
 ;;; you may add alternate paths, in case one path ceases to exist.
 ;;; Useful if you have external SSDs and constantly mount and unmount them
 ;;; e.g. (defparameter *music-directory* '(#P "/media/some/ssd/path/Music/" #P "~/Documents/Music/"))
 (defparameter *books-directory* '(#P "~/Documents/Books/"))
 (defparameter *pictures-directory* '(#P "~/Pictures/"))
+(defparameter *video-directory* '(#P "~/Documents/Video/"))
 (defparameter *music-directory* '(#P "~/Documents/Music/"))
 (defparameter *terminal* "st")
 (defparameter *player* '("nvlc" "ffplay"))
+(defparameter *video-player* '("vlc" "ffplay"))
 (defparameter *editor* "nvim")
 
 ;; ListOfPaths -> Path
@@ -90,6 +97,9 @@
         ((find path *audio* :test #'pathname-match-p)
          (launch-player *terminal* (available-program *player*) path)
          (go-back-dir curr-path))
+        ((find path *video* :test #'pathname-match-p)
+         (launch-player *terminal* (available-program *video-player*) path)
+         (go-back-dir curr-path))
         ((find path *text* :test #'pathname-match-p)
          (launch-text *terminal* path *editor*)
          (go-back-dir curr-path))
@@ -114,5 +124,7 @@
      (bks-driver *pictures-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("m" "music") :test #'string-equal)
      (bks-driver *music-directory*))
+    ((find (nth 1 sb-ext:*posix-argv*) '("v" "vid") :test #'string-equal)
+     (bks-driver *video-directory*))
     ((find (nth 1 sb-ext:*posix-argv*) '("h" "hw") :test #'string-equal)
      (bks-driver *homework-directory*))))
