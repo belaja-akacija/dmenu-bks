@@ -16,7 +16,6 @@
 (defparameter *pictures-directory* '(#P "~/Pictures/"))
 (defparameter *video-directory* '(#P "~/Documents/Video/"))
 (defparameter *music-directory* '(#P "~/Documents/Music/"))
-(defparameter *homework-directory* '(#P "~/Documents/Personal/CS-degree/homework/"))
 (defparameter *terminal* "st")
 (defparameter *player* '("nvlc" "ffplay"))
 (defparameter *video-player* '("vlc" "ffplay"))
