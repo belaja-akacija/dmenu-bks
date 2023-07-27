@@ -1,11 +1,18 @@
+(defmacro handle-dmenu-error (dmenu)
+  `(multiple-value-bind (x y error) ,dmenu
+     (if (= error 1)
+         (uiop:quit 0)
+         (string-trim '(#\NewLine #\Space) x))))
+
 (defun launch-dmenu (lngth file &optional label)
-  (string-trim '(#\NewLine #\Space) (uiop:run-program `("dmenu" "-l" ,lngth "-p" ,label)
-                     :input file
-                     :output :string
-                     :ignore-error-status nil)))
+  (uiop:run-program `("dmenu" "-l" ,lngth "-p" ,label)
+                    :input file
+                    :output :string
+                    :ignore-error-status t))
 
 (defun launch-dmenu-prompt (prompt)
-  (string-trim '(#\NewLine) (uiop:run-program `("dmenu" "-l" "6" "-p" ,prompt) :output :string)))
+  (uiop:run-program `("dmenu" "-l" "6" "-p" ,prompt) :output :string
+                                             :ignore-error-status t))
 
 (defun launch-zathura (path)
   (uiop:run-program `("zathura" ,path)))
@@ -26,7 +33,7 @@
 (defun launch-generic (program path &optional terminal)
   (if (null terminal)
       (uiop:run-program `(,program ,path))
-        (uiop:run-program `(,terminal "-e" ,program ,path))))
+      (uiop:run-program `(,terminal "-e" ,program ,path))))
 
 (defun launch-text (terminal path &optional editor)
   (let ((editor-list '("vim" "nvim"))

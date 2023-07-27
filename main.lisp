@@ -16,6 +16,7 @@
 (defparameter *pictures-directory* '(#P "~/Pictures/"))
 (defparameter *video-directory* '(#P "~/Documents/Video/"))
 (defparameter *music-directory* '(#P "~/Documents/Music/"))
+(defparameter *homework-directory* '(#P "~/Documents/Personal/CS-degree/homework/"))
 (defparameter *terminal* "st")
 (defparameter *player* '("nvlc" "ffplay"))
 (defparameter *video-player* '("vlc" "ffplay"))
@@ -50,7 +51,7 @@
          (tmp #P "/tmp/bks.tmp"))
     (overwrite-file! tmp path-list)
     (if (check-path path)
-        (launch-dmenu "8" tmp (format nil "(~A) Choose file: " path-length)) ; show only 8 files at a time
+        (handle-dmenu-error (launch-dmenu "8" tmp (format nil "(~A) Choose file: " path-length))) ; show only 8 files at a time
         (launch-dmenu path-length tmp "Directory not found."))))
 
 (defun follow-path (path cwd)
@@ -79,12 +80,12 @@
            ;; TODO: should this be extracted from the function itself, or stay private?
            (launch-generic-program ()
              "Launch a program with a prompt in dmenu"
-             (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
+             (launch-generic (handle-dmenu-error (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path))))
                              path
                              (if (not (string=
                                         "n"
                                         (string-downcase
-                                          (launch-dmenu-prompt "With terminal?(Y/n)"))))
+                                          (handle-dmenu-error (launch-dmenu-prompt "With terminal?(Y/n)")))))
                                  *terminal* ; if not "n", then send it with the terminal variable in the param list
                                  nil)))) ; still a bit of an abomination, but not as bad now
       (cond
@@ -113,7 +114,7 @@
 "Follow the first available path and show the directory in dmenu"
   (let ((path (available-path lop)))
     (if (equal path #P "")
-        (launch-dmenu-prompt (format nil "Unavailable path: ~A" path))
+        (handle-dmenu-error (launch-dmenu-prompt (format nil "Unavailable path: ~A" path)))
         (follow-path (show-dir path) path))))
 
 (defun main ()
