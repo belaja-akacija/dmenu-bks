@@ -5,14 +5,16 @@
          (string-trim '(#\NewLine #\Space) x))))
 
 (defun launch-dmenu (lngth file &optional label)
-  (uiop:run-program `("dmenu" "-l" ,lngth "-p" ,label)
-                    :input file
-                    :output :string
-                    :ignore-error-status t))
+  (handle-dmenu-error
+    (uiop:run-program `("dmenu" "-l" ,lngth "-p" ,label)
+                     :input file
+                     :output :string
+                     :ignore-error-status t)))
 
 (defun launch-dmenu-prompt (prompt)
-  (uiop:run-program `("dmenu" "-l" "6" "-p" ,prompt) :output :string
-                                             :ignore-error-status t))
+  (handle-dmenu-error
+    (uiop:run-program `("dmenu" "-l" "6" "-p" ,prompt) :output :string
+                     :ignore-error-status t)))
 
 (defun launch-zathura (path)
   (uiop:run-program `("zathura" ,path)))

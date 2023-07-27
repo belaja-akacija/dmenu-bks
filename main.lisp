@@ -50,7 +50,7 @@
          (tmp #P "/tmp/bks.tmp"))
     (overwrite-file! tmp path-list)
     (if (check-path path)
-        (handle-dmenu-error (launch-dmenu "8" tmp (format nil "(~A) Choose file: " path-length))) ; show only 8 files at a time
+        (launch-dmenu "8" tmp (format nil "(~A) Choose file: " path-length)) ; show only 8 files at a time
         (launch-dmenu path-length tmp "Directory not found."))))
 
 (defun follow-path (path cwd)
@@ -79,12 +79,12 @@
            ;; TODO: should this be extracted from the function itself, or stay private?
            (launch-generic-program ()
              "Launch a program with a prompt in dmenu"
-             (launch-generic (handle-dmenu-error (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path))))
+             (launch-generic (launch-dmenu-prompt (format nil "(~A) Which program?" (pathname-name path)))
                              path
                              (if (not (string=
                                         "n"
                                         (string-downcase
-                                          (handle-dmenu-error (launch-dmenu-prompt "With terminal?(Y/n)")))))
+                                          (launch-dmenu-prompt "With terminal?(Y/n)"))))
                                  *terminal* ; if not "n", then send it with the terminal variable in the param list
                                  nil)))) ; still a bit of an abomination, but not as bad now
       (cond
@@ -113,7 +113,7 @@
 "Follow the first available path and show the directory in dmenu"
   (let ((path (available-path lop)))
     (if (equal path #P "")
-        (handle-dmenu-error (launch-dmenu-prompt (format nil "Unavailable path: ~A" path)))
+        (launch-dmenu-prompt (format nil "Unavailable path: ~A" path))
         (follow-path (show-dir path) path))))
 
 (defun main ()
