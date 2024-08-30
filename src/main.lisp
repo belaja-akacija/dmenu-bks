@@ -1,10 +1,10 @@
-;;;; open a pdf in zathura in my bookmarks folder from dmenu (and more!)
+;;;; Written by Eliza Oselskyi (belaja-akacija)
+;;;; Version: 1.10
+;;;; Description: open a pdf in zathura in my bookmarks folder from dmenu (and more!)
 
 ;;; TODO: add feature to be able to choose which alternate directory to go to.
 ;;; But the default should always be the first one in the list, or the first
 ;;; one that is available.
-
-;; Logic to read a config file into the program
 
 ;; ListOfPaths -> Path
 (defun available-path (lop)
@@ -55,6 +55,7 @@
   ;(follow-path (show-dir path) (fad:pathname-directory-pathname path)))
 
 ;;; TODO cleanup this function. Possibly extract out that really nested thing (pls)
+;;; Should write a generic driver function that can take in a program and path as an input
 (defun send-file (path)
   "Send the directory path to the program that opens that type of file"
   (let ((curr-path (directory-namestring path)))
